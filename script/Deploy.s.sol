@@ -52,6 +52,7 @@ contract DeployHome is LZState {
     }
 }
 
+// forge script script/Deploy.s.sol:DeployHome --rpc-url sepolia --broadcast --verify -vvvv --etherscan-api-key sepolia
 
 //Note: Deploy OFT on remote
 contract DeployElsewhere is LZState {
@@ -69,6 +70,8 @@ contract DeployElsewhere is LZState {
         MocaOFT remoteOFT = new MocaOFT(name, symbol, remoteLzEP, delegate, owner);
     }
 }
+
+// forge script script/Deploy.s.sol:DeployElsewhere --rpc-url polygon_mumbai --broadcast --verify -vvvv --etherscan-api-key polygon_mumbai
 
 //------------------------------ SETUP ------------------------------------
 

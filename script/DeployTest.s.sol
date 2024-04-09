@@ -51,7 +51,7 @@ contract DeployHome is Script, LZState {
 }
 
 
-// forge script script/Deploy.s.sol:DeployHome --rpc-url sepolia --broadcast --verify -vvvv --etherscan-api-key sepolia
+// forge script script/DeployTest.s.sol:DeployHome --rpc-url sepolia --broadcast --verify -vvvv --etherscan-api-key sepolia
     
 
 //Note: Deploy OFT on remote
@@ -73,7 +73,7 @@ contract DeployElsewhere is Script, LZState {
     }
 }
 
-// forge script script/Deploy.s.sol:DeployElsewhere --rpc-url polygon_mumbai --broadcast --verify -vvvv --etherscan-api-key polygon_mumbai
+// forge script script/DeployTest.s.sol:DeployElsewhere --rpc-url polygon_mumbai --broadcast --verify -vvvv --etherscan-api-key polygon_mumbai
 
 
 //------------------------------ SETUP ------------------------------------
@@ -81,11 +81,11 @@ contract DeployElsewhere is Script, LZState {
 abstract contract State is LZState {
     
     // home
-    address public mocaTokenAddress = address(0xFe149349285995D59Ec3FD6A5080840443906B45);    
-    address public mocaTokenAdapterAddress = address(0xa8F355AE124d7120dAEA13239b6cC89FB0376779);                     
+    address public mocaTokenAddress = address(0xB9B3282D15D86BfFEbf3e2BdEb564E071834fAb3);    
+    address public mocaTokenAdapterAddress = address(0xF49880d03567302Cb20B4A668bD69321B0b1bF59);                     
 
     // remote
-    address public mocaOFTAddress = address(0x0EB26b982341c37A02812738C6c10EB0b66ef4F7);
+    address public mocaOFTAddress = address(0xdFBfeE56AB39e39fb7f0EFeE329E96c57b39Ba44);
 
     // set contracts
     MocaToken public mocaToken = MocaToken(mocaTokenAddress);
@@ -112,7 +112,7 @@ contract SetRemoteOnHome is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetRemoteOnHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetRemoteOnHome --rpc-url sepolia --broadcast -vvvv
 
 contract SetRemoteOnAway is State, Script {
 
@@ -130,7 +130,7 @@ contract SetRemoteOnAway is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetRemoteOnAway --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetRemoteOnAway --rpc-url polygon_mumbai --broadcast -vvvv
 
 
 // ------------------------------------------- Gas Limits -------------------------
@@ -158,7 +158,7 @@ contract SetGasLimitsHome is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetGasLimitsHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetGasLimitsHome --rpc-url sepolia --broadcast -vvvv
 
 
 contract SetGasLimitsAway is State, Script {
@@ -182,7 +182,7 @@ contract SetGasLimitsAway is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetGasLimitsAway --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetGasLimitsAway --rpc-url polygon_mumbai --broadcast -vvvv
 
 // ------------------------------------------- Set Rate Limits  -----------------------------------------
 
@@ -199,7 +199,7 @@ contract SetRateLimitsHome is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetRateLimitsHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetRateLimitsHome --rpc-url sepolia --broadcast -vvvv
 
 contract SetRateLimitsRemote is State, Script {
 
@@ -215,7 +215,7 @@ contract SetRateLimitsRemote is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SetRateLimitsRemote --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetRateLimitsRemote --rpc-url polygon_mumbai --broadcast -vvvv
 
 // ------------------------------------------- Send sum tokens  -----------------------------------------
 
@@ -255,7 +255,7 @@ contract SendTokensToAway is State, Script {
     }
 }
 
-//  forge script script/Deploy.s.sol:SendTokensToAway --rpc-url sepolia --broadcast -vvvv
+//  forge script script/DeployTest.s.sol:SendTokensToAway --rpc-url sepolia --broadcast -vvvv
 
 contract SendTokensToHome is State, Script {
 
@@ -286,7 +286,7 @@ contract SendTokensToHome is State, Script {
     }
 }
 
-//  forge script script/Deploy.s.sol:SendTokensToHome --rpc-url polygon_mumbai --broadcast -vvvv
+//  forge script script/DeployTest.s.sol:SendTokensToHome --rpc-url polygon_mumbai --broadcast -vvvv
 
 
 contract SendTokensToRemotePlusGas is State, Script {
@@ -325,7 +325,7 @@ contract SendTokensToRemotePlusGas is State, Script {
     }
 }
 
-//  forge script script/Deploy.s.sol:SendTokensToRemotePlusGas --rpc-url sepolia --broadcast -vvvv
+//  forge script script/DeployTest.s.sol:SendTokensToRemotePlusGas --rpc-url sepolia --broadcast -vvvv
 
 
 // matic before: 1.35870840179732543 MATIC
@@ -364,7 +364,7 @@ contract BreakBridge is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:BreakBridge --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTest.s.sol:BreakBridge --rpc-url polygon_mumbai --broadcast -vvvv
 
 
 contract SendAndCallToRemote is State, Script {
@@ -399,7 +399,7 @@ contract SendAndCallToRemote is State, Script {
     }
 }
 
-// forge script script/Deploy.s.sol:SendAndCallToRemote --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SendAndCallToRemote --rpc-url sepolia --broadcast -vvvv
 
 
 
@@ -486,4 +486,4 @@ contract SetDvnHome is State, Script, DvnData {
     }
 }
 
-// forge script script/Deploy.s.sol:SetDvnHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTest.s.sol:SetDvnHome --rpc-url sepolia --broadcast -vvvv

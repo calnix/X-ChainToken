@@ -103,7 +103,7 @@ Putting in place x-chain transfer limits essentially allows us to limit the capi
 
 ## Testnet Deployments
 
-V1: Deploy.s.sol
+V1: DeployTest.s.sol
 
 - MocaToken: https://sepolia.etherscan.io/address/0xFe149349285995D59Ec3FD6A5080840443906B45
 - MocaTokenAdaptor: https://sepolia.etherscan.io/address/0xa8F355AE124d7120dAEA13239b6cC89FB0376779
