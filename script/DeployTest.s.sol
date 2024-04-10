@@ -308,8 +308,8 @@ contract SendTokensToRemotePlusGas is State, Script {
         SendParam memory sendParam = SendParam({
             dstEid: remoteChainID,                                                                  // Destination endpoint ID.
             to: bytes32(uint256(uint160(address(0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db)))),     // Recipient address.
-            amountLD: 1 ether,                                                                      // Amount to send in local decimals        
-            minAmountLD: 1 ether,                                                                   // Minimum amount to send in local decimals.
+            amountLD: 0.1 ether,                                                                      // Amount to send in local decimals        
+            minAmountLD: 0.1 ether,                                                                   // Minimum amount to send in local decimals.
             extraOptions: extraOptions,                                                             // Additional options supplied by the caller to be used in the LayerZero message.
             composeMsg: nullBytes,                                                               // The composed message for the send() operation.
             oftCmd: nullBytes                                                                    // The OFT command to be executed, unused in default OFT implementations.
@@ -399,6 +399,7 @@ contract SendAndCallToRemote is State, Script {
     }
 }
 
+// note: this is expected to revert
 // forge script script/DeployTest.s.sol:SendAndCallToRemote --rpc-url sepolia --broadcast -vvvv
 
 

@@ -22,13 +22,13 @@ abstract contract LZState is Script {
     address remoteLzEP = polygonEP;
 
     // token data
-    string public name = "Moca";
-    string public symbol = "MOCA";
+    string public name = "Latte";
+    string public symbol = "Latte";
 
     // priviledged addresses
     address public ownerMultiSig = 0x1291d48f9524cE496bE32D2DC33D5E157b6Ed1e3;
     address public treasuryMultiSig = 0xe35B78991633E8130131D6A73302F96678e80f8D;
-    address public deployer = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
+    address public deployer = 0x8C9C001F821c04513616fd7962B2D8c62f925fD2;
 
     modifier broadcast() {
 
@@ -57,6 +57,7 @@ contract DeployHome is LZState {
     }
 }
 
+// forge script script/DeployFinal.s.sol:DeployHome --rpc-url mainnet --broadcast --verify -vvvv --etherscan-api-key mainnet 
 
 //Note: Deploy OFT on remote
 contract DeployElsewhere is LZState {
@@ -70,6 +71,8 @@ contract DeployElsewhere is LZState {
         MocaOFT remoteOFT = new MocaOFT(name, symbol, remoteLzEP, delegate, owner);
     }
 }
+
+// forge script script/DeployFinal.s.sol:DeployElsewhere --rpc-url polygon --broadcast --verify -vvvv --etherscan-api-key polygon 
 
 //------------------------------ SETUP ------------------------------------
 

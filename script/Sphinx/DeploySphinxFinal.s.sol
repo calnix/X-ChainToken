@@ -4,9 +4,9 @@ pragma solidity ^0.8.20;
 import {Script, console2} from "forge-std/Script.sol";
 import {Sphinx, Network} from "@sphinx-labs/contracts/SphinxPlugin.sol";
 
-import {MocaToken} from "./../src/MocaToken.sol";
-import {MocaOFT} from "./../src/MocaOFT.sol";
-import {MocaTokenAdapter} from "./../src/MocaTokenAdapter.sol";
+import {MocaToken} from "./../../src/MocaToken.sol";
+import {MocaOFT} from "./../../src/MocaOFT.sol";
+import {MocaTokenAdapter} from "./../../src/MocaTokenAdapter.sol";
 
 import { IOAppOptionsType3, EnforcedOptionParam } from "node_modules/@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 import { SetConfigParam } from "node_modules/@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/IMessageLibManager.sol";
@@ -39,8 +39,8 @@ abstract contract LZState is Sphinx, Script {
     bytes32 public salt = bytes32("8");
 
     // token data
-    string public name = "Moca";
-    string public symbol = "MOCA";
+    string public name = "Latte";
+    string public symbol = "Latte";
 
     // priviledged addresses
     address public ownerMultiSig = 0x1291d48f9524cE496bE32D2DC33D5E157b6Ed1e3;
@@ -75,7 +75,7 @@ contract DeployFinal is LZState, DvnData {
 
     // Sphinx setup
     function configureSphinx() public override {
-        sphinxConfig.owners = [address(0x5B7c596ef4804DC7802dB28618d353f7Bf14C619)]; // Add owner(s)
+        sphinxConfig.owners = [address(0x0e0C2e7Fe51Bf98a1C3c385be843431883a0b5E9)]; // Add owner(s)
         sphinxConfig.orgId = "clu0e13bc0001t058dr9pubfl"; // Add Sphinx org ID
         
         sphinxConfig.testnets = ["arbitrum_sepolia", "polygon_mumbai"];
@@ -314,4 +314,4 @@ contract DeployFinal is LZState, DvnData {
 }
 
 
-// npx sphinx propose script/DeployFinal.s.sol --networks mainnets
+// npx sphinx propose script/DeploySphinxV2.s.sol --networks mainnets
