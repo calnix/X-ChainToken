@@ -1,17 +1,13 @@
-name: test
-
 on: [push]
 
-env:
-  FOUNDRY_PROFILE: ci
+name: test
 
 jobs:
   check:
     name: Foundry project
     runs-on: ubuntu-latest
-    
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
@@ -20,23 +16,5 @@ jobs:
         with:
           version: nightly
 
-      - name: Install Dependencies
-        run: forge install
-          
-      - name: Run Forge build
-        run: |
-          forge --version
-          forge build --sizes
-        id: build
-
-      - name: Run Forge tests
+      - name: Run tests
         run: forge test -vvv
-        id: test
-        env:
-          # Add any environment variables needed for tests
-          FOUNDRY_FUZZ_RUNS: 100
-          FOUNDRY_FUZZ_MAX_TEST_REJECTS: 65536
-
-      - name: Gas Snapshot
-        run: forge snapshot
-        id: gas
