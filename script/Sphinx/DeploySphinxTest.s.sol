@@ -36,15 +36,15 @@ abstract contract LZState is Sphinx, Script {
     uint256 public blockChainId_polygon = 137;
 
     //create2
-    bytes32 public salt = bytes32("8");
+    bytes32 public salt = bytes32("18");
 
     // token data
     string public name = "Latte";
     string public symbol = "Latte";
 
     // priviledged addresses
-    address public ownerMultiSig = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
-    address public treasuryMultiSig = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
+    address public ownerMultiSig = 0x8C9C001F821c04513616fd7962B2D8c62f925fD2;
+    address public treasuryMultiSig = 0x8C9C001F821c04513616fd7962B2D8c62f925fD2;
 }
 
 abstract contract DvnData {
@@ -81,10 +81,10 @@ contract DeployFinal is LZState, DvnData {
         sphinxConfig.testnets = ["arbitrum_sepolia", "polygon_mumbai"];
         sphinxConfig.mainnets = ["mainnet", "polygon"];
 
-        sphinxConfig.projectName = "TestTokenV1";
+        sphinxConfig.projectName = "TestTokenNewDVNV2";
         sphinxConfig.threshold = 1;
 
-        sphinxConfig.saltNonce = 1;  //in the event of project clash
+        sphinxConfig.saltNonce = 3;  //in the event of project clash
     }
 
     function precompileAddresses(address delegate, address owner) public returns(address, address, address) {
@@ -126,7 +126,7 @@ contract DeployFinal is LZState, DvnData {
         
         // ownership will be handed over after config has been completed
         address owner = safeAddress();
-        address delegate = safeAddress();
+        address delegate = 0x8C9C001F821c04513616fd7962B2D8c62f925fD2;
 
         (address mocaTokenAddress, address mocaTokenAdapterAddress, address mocaOFTAddress) = precompileAddresses(delegate, owner);
         
@@ -173,7 +173,7 @@ contract DeployFinal is LZState, DvnData {
             mocaTokenAdapter.setInboundLimit(remoteChainID, 10 ether);
             
             //............ Config DVN
-            setDvnHome(mocaTokenAdapterAddress);
+            //setDvnHome(mocaTokenAdapterAddress);
 
             //...... delegate
 
@@ -211,7 +211,7 @@ contract DeployFinal is LZState, DvnData {
             mocaOFT.setInboundLimit(homeChainID, 10 ether);
 
             //............ Config DVN
-            setDvnRemote(mocaOFTAddress);
+            //setDvnRemote(mocaOFTAddress);
 
             //...... delegate
 

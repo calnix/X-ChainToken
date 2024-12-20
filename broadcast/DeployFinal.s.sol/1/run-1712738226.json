@@ -1,0 +1,59 @@
+{
+  "transactions": [
+    {
+      "hash": "0xe8142749acfc897f88068efded2fcb6ce812802c7809ef5c7e0fa1a3061ac70f",
+      "transactionType": "CALL",
+      "contractName": "MocaTokenAdapter",
+      "contractAddress": "0xCC76Dd68ff8f702D1D0CED0a6F221835C07a10Af",
+      "function": "setOutboundLimit(uint32,uint256)",
+      "arguments": [
+        "30109",
+        "10000000000000000000"
+      ],
+      "transaction": {
+        "type": "0x02",
+        "from": "0x8c9c001f821c04513616fd7962b2d8c62f925fd2",
+        "to": "0xcc76dd68ff8f702d1d0ced0a6f221835c07a10af",
+        "gas": "0x100f0",
+        "value": "0x0",
+        "data": "0x65d28a6b000000000000000000000000000000000000000000000000000000000000759d0000000000000000000000000000000000000000000000008ac7230489e80000",
+        "nonce": "0x6",
+        "accessList": []
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
+    },
+    {
+      "hash": null,
+      "transactionType": "CALL",
+      "contractName": "MocaTokenAdapter",
+      "contractAddress": "0xCC76Dd68ff8f702D1D0CED0a6F221835C07a10Af",
+      "function": "setInboundLimit(uint32,uint256)",
+      "arguments": [
+        "30109",
+        "10000000000000000000"
+      ],
+      "transaction": {
+        "type": "0x02",
+        "from": "0x8c9c001f821c04513616fd7962b2d8c62f925fd2",
+        "to": "0xcc76dd68ff8f702d1d0ced0a6f221835c07a10af",
+        "gas": "0x1014c",
+        "value": "0x0",
+        "data": "0x9a2fe9e4000000000000000000000000000000000000000000000000000000000000759d0000000000000000000000000000000000000000000000008ac7230489e80000",
+        "nonce": "0x7",
+        "accessList": []
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
+    }
+  ],
+  "receipts": [],
+  "libraries": [],
+  "pending": [
+    "0xe8142749acfc897f88068efded2fcb6ce812802c7809ef5c7e0fa1a3061ac70f"
+  ],
+  "returns": {},
+  "timestamp": 1712738226,
+  "chain": 1,
+  "commit": "f9c0721"
+}

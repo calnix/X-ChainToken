@@ -7,7 +7,7 @@ import {MocaTokenMock} from "./../test/mocks/MocaTokenMock.sol";
 import {MocaOFT} from "./../src/MocaOFT.sol";
 import {MocaTokenAdapter} from "./../src/MocaTokenAdapter.sol";
 
-abstract contract LZState {
+abstract contract LZState is Script {
     
     //Note: LZV2 testnet addresses
 
@@ -17,62 +17,74 @@ abstract contract LZState {
     uint16 public mumbaiID = 40109;
     address public mumbaiEP = 0x6EDCE65403992e310A62460808c4b910D972f10f;
 
+    uint16 public bnbID = 40102;
+    address public bnbEP = 0x6EDCE65403992e310A62460808c4b910D972f10f;
+
     uint16 public arbSepoliaID = 40231;
     address public arbSepoliaEP = 0x6EDCE65403992e310A62460808c4b910D972f10f;
+
+    uint16 public opSepoliaID = 40232;
+    address public opSepoliaEP = 0x6EDCE65403992e310A62460808c4b910D972f10f;
+
+    uint16 public baseSepoliaID = 40245;
+    address public baseSepoliaEP = 0x6EDCE65403992e310A62460808c4b910D972f10f;
 
     uint16 homeChainID = sepoliaID;
     address homeLzEP = sepoliaEP;
 
-    uint16 remoteChainID = mumbaiID;
-    address remoteLzEP = mumbaiEP;
+    uint16 remoteChainID = baseSepoliaID;
+    address remoteLzEP = baseSepoliaEP;
+
+    address public deployerAddress = vm.envAddress("PUBLIC_KEY_TEST");
+
+    modifier broadcast() {
+
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_TEST");
+        vm.startBroadcast(deployerPrivateKey);
+
+        _;
+
+        vm.stopBroadcast();
+    }
 }
 
 //Note: Deploy token + adaptor
-contract DeployHome is Script, LZState {
+contract DeployHome is LZState {
     
-    function run() public {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
         // mint supply to treasury
         string memory name = "TestToken"; 
         string memory symbol = "TT";
-        address treasury = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
+        address treasury = deployerAddress;
         MocaTokenMock mocaToken = new MocaTokenMock(name, symbol, treasury);
         
         // set msg.sender as delegate and owner
-        address deletate = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
-        address owner = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
-        MocaTokenAdapter mocaTokenAdapter = new MocaTokenAdapter(address(mocaToken), homeLzEP, deletate, owner);
-
-        vm.stopBroadcast();
+        address delegate = deployerAddress;
+        address owner = deployerAddress;
+        MocaTokenAdapter mocaTokenAdapter = new MocaTokenAdapter(address(mocaToken), homeLzEP, delegate, owner);
     }
 }
 
-// forge script script/DeployMock.s.sol:DeployHome --rpc-url sepolia --broadcast --verify -vvvv --etherscan-api-key sepolia
+// forge script script/DeployTestMock.s.sol:DeployHome --rpc-url sepolia --broadcast --verify -vvvv --etherscan-api-key sepolia
     
 
 //Note: Deploy OFT on remote
-contract DeployElsewhere is Script, LZState {
+contract DeployElsewhere is LZState {
 
-    function run() public {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
         //params
         string memory name = "TestToken"; 
         string memory symbol = "TT";
-        address delegate = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
-        address owner = 0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db;
+        address delegate = deployerAddress;
+        address owner = deployerAddress;
 
         MocaOFT remoteOFT = new MocaOFT(name, symbol, remoteLzEP, delegate, owner);
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:DeployElsewhere --rpc-url polygon_mumbai --broadcast --verify -vvvv --etherscan-api-key polygon_mumbai
+// forge script script/DeployTestMock.s.sol:DeployElsewhere --rpc-url base_sepolia --broadcast --verify -vvvv --etherscan-api-key base_sepolia
 
 
 //------------------------------ SETUP ------------------------------------
@@ -80,11 +92,11 @@ contract DeployElsewhere is Script, LZState {
 abstract contract State is LZState {
     
     // home
-    address public mocaTokenAddress = address(0xE93f35988731A11280032FD8B7338B1ac3f52729);    
-    address public mocaTokenAdapterAddress = address(0xb440A7367DfEB307Cb2E7e3Cb80625157126A5CA);                     
+    address public mocaTokenAddress = address(0x73ce27235B1d65028F1a7470B1f471Df66a9504f);    
+    address public mocaTokenAdapterAddress = address(0x859eba9f58873d9284ccd211611494ED9D842204);                     
 
     // remote
-    address public mocaOFTAddress = address(0xE415dCa40E5587AF6DeC72683a55ebEbA911Ba6e);
+    address public mocaOFTAddress = address(0x03946287b52B88C8357E813fbA3F472c60FaE727);
 
     // set contracts
     MocaTokenMock public mocaToken = MocaTokenMock(mocaTokenAddress);
@@ -95,52 +107,41 @@ abstract contract State is LZState {
 
 
 // ------------------------------------------- Trusted Remotes: connect contracts -------------------------
-contract SetRemoteOnHome is State, Script {
+contract SetRemoteOnHome is State {
 
-    function run() public  {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
        
         // eid: The endpoint ID for the destination chain the other OFT contract lives on
         // peer: The destination OFT contract address in bytes32 format
         bytes32 peer = bytes32(uint256(uint160(address(mocaOFTAddress))));
         mocaTokenAdapter.setPeer(remoteChainID, peer);
-        
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:SetRemoteOnHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetRemoteOnHome --rpc-url sepolia --broadcast -vvvv
 
-contract SetRemoteOnAway is State, Script {
+contract SetRemoteOnAway is State {
 
-    function run() public {
+    function run() public broadcast {
         
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
-
         // eid: The endpoint ID for the destination chain the other OFT contract lives on
         // peer: The destination OFT contract address in bytes32 format
         bytes32 peer = bytes32(uint256(uint160(address(mocaTokenAdapter))));
         mocaOFT.setPeer(homeChainID, peer);
         
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:SetRemoteOnAway --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetRemoteOnAway --rpc-url base_sepolia --broadcast -vvvv
 
 
 // ------------------------------------------- Gas Limits -------------------------
 
 import { IOAppOptionsType3, EnforcedOptionParam } from "node_modules/@layerzerolabs/lz-evm-oapp-v2/contracts/oapp/interfaces/IOAppOptionsType3.sol";
 
-contract SetGasLimitsHome is State, Script {
+contract SetGasLimitsHome is State {
 
-    function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
         EnforcedOptionParam memory enforcedOptionParam;
         // msgType:1 -> a standard token transfer via send()
@@ -153,18 +154,15 @@ contract SetGasLimitsHome is State, Script {
 
         mocaTokenAdapter.setEnforcedOptions(enforcedOptionParams);
 
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:SetGasLimitsHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetGasLimitsHome --rpc-url sepolia --broadcast -vvvv
 
 
-contract SetGasLimitsAway is State, Script {
+contract SetGasLimitsAway is State {
 
-    function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
         
         EnforcedOptionParam memory enforcedOptionParam;
         // msgType:1 -> a standard token transfer via send()
@@ -177,44 +175,35 @@ contract SetGasLimitsAway is State, Script {
 
         mocaOFT.setEnforcedOptions(enforcedOptionParams);
 
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:SetGasLimitsAway --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetGasLimitsAway --rpc-url base_sepolia --broadcast -vvvv
 
 // ------------------------------------------- Set Rate Limits  -----------------------------------------
 
-contract SetRateLimitsHome is State, Script {
+contract SetRateLimitsHome is State {
 
-    function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
-        mocaTokenAdapter.setOutboundLimit(remoteChainID, 10 ether);
-        mocaTokenAdapter.setInboundLimit(remoteChainID, 10 ether);
-
-        vm.stopBroadcast();
+        mocaTokenAdapter.setOutboundLimit(remoteChainID, 10000000 ether);
+        mocaTokenAdapter.setInboundLimit(remoteChainID, 10000000 ether);
     }
 }
 
-// forge script script/DeployMock.s.sol:SetRateLimitsHome --rpc-url sepolia --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetRateLimitsHome --rpc-url sepolia --broadcast -vvvv
 
-contract SetRateLimitsRemote is State, Script {
+contract SetRateLimitsRemote is State {
 
-    function run() public {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
         
-        mocaOFT.setOutboundLimit(homeChainID, 10 ether);
-        mocaOFT.setInboundLimit(homeChainID, 10 ether);
+        mocaOFT.setOutboundLimit(homeChainID, 10000000 ether);
+        mocaOFT.setInboundLimit(homeChainID, 10000000 ether);
 
-        vm.stopBroadcast();
     }
 }
 
-// forge script script/DeployMock.s.sol:SetRateLimitsRemote --rpc-url polygon_mumbai --broadcast -vvvv
+// forge script script/DeployTestMock.s.sol:SetRateLimitsRemote --rpc-url base_sepolia --broadcast -vvvv
 
 // ------------------------------------------- Send sum tokens  -------------------------
 
@@ -222,12 +211,9 @@ contract SetRateLimitsRemote is State, Script {
 import "node_modules/@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 import { MessagingParams, MessagingFee, MessagingReceipt } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 
-contract SendTokensToAway is State, Script {
+contract SendTokensToAway is State {
 
-    function run() public {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
         //set approval for adaptor to spend tokens
         mocaToken.approve(mocaTokenAdapterAddress, 10 ether);
@@ -249,18 +235,14 @@ contract SendTokensToAway is State, Script {
         // send tokens xchain
         mocaTokenAdapter.send{value: messagingFee.nativeFee}(sendParam, messagingFee, payable(0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db ));
 
-        vm.stopBroadcast();
     }
 }
 
-//  forge script script/DeployMock.s.sol:SendTokensToAway --rpc-url sepolia --broadcast -vvvv
+//  forge script script/DeployTestMock.s.sol:SendTokensToAway --rpc-url sepolia --broadcast -vvvv
 
-contract SendTokensToRemotePlusGas is State, Script {
+contract SendTokensToRemotePlusGas is State {
 
-    function run() public {
-
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+    function run() public broadcast {
 
         //set approval for adaptor to spend tokens
         mocaToken.approve(mocaTokenAdapterAddress, 1 ether);
@@ -287,8 +269,7 @@ contract SendTokensToRemotePlusGas is State, Script {
         // send tokens xchain
         mocaTokenAdapter.send{value: messagingFee.nativeFee}(sendParam, messagingFee, payable(0xdE05a1Abb121113a33eeD248BD91ddC254d5E9Db));
 
-        vm.stopBroadcast();
     }
 }
 
-//  forge script script/DeployMock.s.sol:SendTokensToRemotePlusGas --rpc-url sepolia --broadcast -vvvv
+//  forge script script/DeployTestMock.s.sol:SendTokensToRemotePlusGas --rpc-url sepolia --broadcast -vvvv

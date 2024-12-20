@@ -100,7 +100,6 @@ Both MocaOFT and MocaTokenAdaptor implement daily rate limits.
 
 Putting in place x-chain transfer limits essentially allows us to limit the capital at risk due an exploit arising from an unknown LZ vulnerability.
 
-
 ## Testnet Deployments
 
 V1: DeployTest.s.sol
@@ -109,7 +108,7 @@ V1: DeployTest.s.sol
 - MocaTokenAdaptor: https://sepolia.etherscan.io/address/0xa8F355AE124d7120dAEA13239b6cC89FB0376779
 - MocaOFT: https://mumbai.polygonscan.com/address/0x0EB26b982341c37A02812738C6c10EB0b66ef4F7
 
-V2: DeployMock.s.sol (has unrestricted mint function)
+V2: DeployTestMock.s.sol (has unrestricted mint function)
 
 - MocaTokenMock: https://sepolia.etherscan.io/address/0xE93f35988731A11280032FD8B7338B1ac3f52729
 - MocaTokenAdaptor: https://sepolia.etherscan.io/address/0xb440A7367DfEB307Cb2E7e3Cb80625157126A5CA

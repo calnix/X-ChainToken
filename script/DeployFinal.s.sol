@@ -22,17 +22,26 @@ abstract contract LZState is Script {
     address remoteLzEP = polygonEP;
 
     // token data
-    string public name = "Latte";
-    string public symbol = "Latte";
+    string public name = "Moca";
+    string public symbol = "MOCA";
 
     // priviledged addresses
     address public ownerMultiSig = 0x1291d48f9524cE496bE32D2DC33D5E157b6Ed1e3;
-    address public treasuryMultiSig = 0xe35B78991633E8130131D6A73302F96678e80f8D;
-    address public deployer = 0x8C9C001F821c04513616fd7962B2D8c62f925fD2;
+    address public treasuryMultiSig = 0xc011768eD8B7e4685986e360397bE107fe05819C;
+    address public deployer = 0x84Db3d1de9a43Aa144C21b248AD31a1c83d8334D;
+
+    //operators
+    address public awsScript = address(0x81C2C46de0F533697C5AdFbf4a4C5746947109C9);
+    address public tenderlyScript = address(0xB740c4E1C89D05AE6C95777F89cBecD5555A3484);
+
+    // rate limits
+    uint256 public inboundLimit = 10 ether;
+    uint256 public outboundLimit = 10 ether;
+
 
     modifier broadcast() {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_3");
         vm.startBroadcast(deployerPrivateKey);
 
         _;
@@ -53,7 +62,7 @@ contract DeployHome is LZState {
         
         address delegate = deployer;
         address owner = deployer;
-        MocaTokenAdapter mocaTokenAdapter = new MocaTokenAdapter(address(mocaToken), homeLzEP, delegate, owner);
+        MocaTokenAdapter mocaTokenAdapter = new MocaTokenAdapter(address(0xF944e35f95E819E752f3cCB5Faf40957d311e8c5), homeLzEP, delegate, owner);
     }
 }
 
@@ -79,11 +88,11 @@ contract DeployElsewhere is LZState {
 abstract contract State is LZState {
     
     // home
-    address public mocaTokenAddress = address(0x0);    
-    address public mocaTokenAdapterAddress = address(0x0);                     
+    address public mocaTokenAddress = address(0xF944e35f95E819E752f3cCB5Faf40957d311e8c5);    
+    address public mocaTokenAdapterAddress = address(0x2B11834Ed1FeAEd4b4b3a86A6F571315E25A884D);                     
 
     // remote
-    address public mocaOFTAddress = address(0x0);
+    address public mocaOFTAddress = address(0xF944e35f95E819E752f3cCB5Faf40957d311e8c5);
 
     // set contracts
     MocaToken public mocaToken = MocaToken(mocaTokenAddress);
@@ -104,7 +113,7 @@ contract SetRemoteOnHome is State {
     }
 }
 
-// 
+// forge script script/DeployFinal.s.sol:SetRemoteOnHome --rpc-url mainnet --broadcast -vvvv 
 
 contract SetRemoteOnAway is State {
 
@@ -117,7 +126,8 @@ contract SetRemoteOnAway is State {
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetRemoteOnAway --rpc-url polygon --broadcast -vvvv 
+
 
 // ------------------------------------------- Gas Limits -------------------------
 
@@ -140,7 +150,7 @@ contract SetGasLimitsHome is State {
     }
 }
 
-// 
+// forge script script/DeployFinal.s.sol:SetGasLimitsHome --rpc-url mainnet --broadcast -vvvv 
 
 
 contract SetGasLimitsAway is State {
@@ -160,7 +170,8 @@ contract SetGasLimitsAway is State {
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetGasLimitsAway --rpc-url polygon --broadcast -vvvv 
+
 
 // ------------------------------------------- Set Rate Limits  -----------------------------------------
 
@@ -168,23 +179,23 @@ contract SetRateLimitsHome is State {
 
     function run() public broadcast {
         
-        mocaTokenAdapter.setOutboundLimit(remoteChainID, 10 ether);
-        mocaTokenAdapter.setInboundLimit(remoteChainID, 10 ether);
+        mocaTokenAdapter.setOutboundLimit(remoteChainID, outboundLimit);
+        mocaTokenAdapter.setInboundLimit(remoteChainID, inboundLimit);
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetRateLimitsHome --rpc-url mainnet --broadcast -vvvv 
 
 contract SetRateLimitsRemote is State {
 
     function run() public broadcast {
 
-        mocaOFT.setOutboundLimit(homeChainID, 10 ether);
-        mocaOFT.setInboundLimit(homeChainID, 10 ether);
+        mocaOFT.setOutboundLimit(homeChainID, outboundLimit);
+        mocaOFT.setInboundLimit(homeChainID, inboundLimit);
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetRateLimitsRemote --rpc-url polygon --broadcast -vvvv 
 
 
 // ------------------------------------------- DVN Config  -----------------------------------------
@@ -216,7 +227,9 @@ abstract contract DvnData is State {
     address public receive302_polygon = 0x1322871e4ab09Bc7f5717189434f97bBD9546e95;   
 }
 
-contract SetDvnHome is DvnData {
+// ------------------------------------------- EthSend_PolyReceive -------------------------
+
+contract SetDvnEthSend is DvnData {
 
     function run() public broadcast {
 
@@ -262,14 +275,66 @@ contract SetDvnHome is DvnData {
         address oappAddress = mocaTokenAdapterAddress;
 
         ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, send302_mainnet, configParams);
-        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_mainnet, configParams);
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetDvnEthSend --rpc-url mainnet --broadcast -vvvv 
 
-//Note: Polygon
-contract SetDvnRemote is DvnData {
+contract SetDvnPolyReceive is DvnData {
+
+    function run() public broadcast {
+
+        // ulnConfig struct
+        UlnConfig memory ulnConfig; 
+            // confirmation on eth 
+            ulnConfig.confirmations = 15;      
+            
+            // optional
+            //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
+            ulnConfig.optionalDVNCount; 
+            //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
+            ulnConfig.optionalDVNThreshold; 
+            
+            //required
+            ulnConfig.requiredDVNCount = 4; 
+            address[] memory requiredDVNs = new address[](ulnConfig.requiredDVNCount); 
+                // no duplicates. sorted an an ascending order.
+                requiredDVNs[0] = layerZero_polygon;
+                requiredDVNs[1] = nethermind_polygon;
+                requiredDVNs[2] = animoca_polygon;
+                requiredDVNs[3] = gcp;
+                
+            ulnConfig.requiredDVNs = requiredDVNs;
+        
+        // config bytes
+        bytes memory configBytes;
+        configBytes = abi.encode(ulnConfig);
+
+        // params
+        SetConfigParam memory param1 = SetConfigParam({
+            eid: homeChainID,     //note: dstEid
+            configType: 2,
+            config: configBytes
+        });
+
+        // array of params
+        SetConfigParam[] memory configParams = new SetConfigParam[](1);
+        configParams[0] = param1;
+        
+        //call endpoint
+        address endPointAddress = remoteLzEP;
+        address oappAddress = mocaOFTAddress;
+
+        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_polygon, configParams);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:SetDvnPolyReceive --rpc-url polygon --broadcast -vvvv 
+
+
+// ------------------------------------------- POlySend_EthReceive -------------------------
+
+contract SetDvnPolySend is DvnData {
 
     function run() public broadcast {
 
@@ -301,7 +366,7 @@ contract SetDvnRemote is DvnData {
 
         // params
         SetConfigParam memory param1 = SetConfigParam({
-            eid: homeChainID,     // dstEid
+            eid: homeChainID,     //note: dstEid
             configType: 2,
             config: configBytes
         });
@@ -310,14 +375,112 @@ contract SetDvnRemote is DvnData {
         SetConfigParam[] memory configParams = new SetConfigParam[](1);
         configParams[0] = param1;
         
-        //call endpoint
+        //note: call endpoint
         address endPointAddress = remoteLzEP;
         address oappAddress = mocaOFTAddress;
 
         ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, send302_polygon, configParams);
-        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_polygon, configParams);
     }
 }
+
+// forge script script/DeployFinal.s.sol:SetDvnPolySend --rpc-url polygon --broadcast -vvvv 
+
+contract SetDvnEthReceive is DvnData {
+
+    function run() public broadcast {
+
+        // ulnConfig struct
+        UlnConfig memory ulnConfig; 
+            // confirmation on eth 
+            ulnConfig.confirmations = 768;      
+            
+            // optional
+            //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
+            ulnConfig.optionalDVNCount; 
+            //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
+            ulnConfig.optionalDVNThreshold; 
+            
+            //required
+            ulnConfig.requiredDVNCount = 4; 
+            address[] memory requiredDVNs = new address[](ulnConfig.requiredDVNCount); 
+                // no duplicates. sorted an an ascending order.
+                requiredDVNs[0] = layerZero_mainnet;
+                requiredDVNs[1] = animoca_mainnet;
+                requiredDVNs[2] = nethermind_mainnet;
+                requiredDVNs[3] = gcp;
+                
+            ulnConfig.requiredDVNs = requiredDVNs;
+        
+        // config bytes
+        bytes memory configBytes;
+        configBytes = abi.encode(ulnConfig);
+
+        // params
+        SetConfigParam memory param1 = SetConfigParam({
+            eid: remoteChainID,     //note: dstEid
+            configType: 2,
+            config: configBytes
+        });
+
+        // array of params
+        SetConfigParam[] memory configParams = new SetConfigParam[](1);
+        configParams[0] = param1;
+        
+        //note: call endpoint
+        address endPointAddress = homeLzEP;
+        address oappAddress = mocaTokenAdapterAddress;
+
+        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_mainnet, configParams);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:SetDvnEthReceive --rpc-url mainnet --broadcast -vvvv 
+
+
+// ------------------------------------------- Set operators -----------------------------------------
+
+contract SetOperatorHome is DvnData {
+
+    function run() public broadcast {
+        mocaTokenAdapter.setOperator(awsScript, true);
+        mocaTokenAdapter.setOperator(tenderlyScript, true);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:SetOperatorHome --rpc-url mainnet --broadcast -vvvv 
+
+
+contract SetOperatorRemote is DvnData {
+
+    function run() public broadcast {
+        mocaOFT.setOperator(awsScript, true);
+        mocaOFT.setOperator(tenderlyScript, true);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:SetOperatorRemote --rpc-url polygon --broadcast -vvvv 
+
+
+// ------------------------------------------- Whitelist Treasury -----------------------------------------
+
+contract WhitelistTreasuryOnHome is DvnData {
+
+    function run() public broadcast {
+        mocaTokenAdapter.setWhitelist(treasuryMultiSig, true);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:WhitelistTreasuryOnHome --rpc-url mainnet --broadcast -vvvv 
+
+contract WhitelistTreasuryOnRemote is DvnData {
+
+    function run() public broadcast {
+        mocaOFT.setWhitelist(treasuryMultiSig, true);
+    }
+}
+
+// forge script script/DeployFinal.s.sol:WhitelistTreasuryOnRemote --rpc-url polygon --broadcast -vvvv 
+
 
 // ------------------------------------------- Set Owner as delegate -----------------------------------------
 
@@ -329,7 +492,8 @@ contract SetOwnerAsDelegateHome is DvnData {
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetOwnerAsDelegateHome --rpc-url mainnet --broadcast -vvvv 
+
 
 contract SetOwnerAsDelegateRemote is DvnData {
 
@@ -339,7 +503,8 @@ contract SetOwnerAsDelegateRemote is DvnData {
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:SetOwnerAsDelegateRemote --rpc-url polygon --broadcast -vvvv 
+
 
 // ------------------------------------------- Transfer Ownership to multisig -----------------------------------------
 
@@ -351,7 +516,8 @@ contract TransferOwnershipHome is DvnData {
     }
 }
 
-// 
+// forge script script/DeployFinal.s.sol:TransferOwnershipHome --rpc-url mainnet --broadcast -vvvv 
+ 
 
 contract TransferOwnershipRemote is DvnData {
 
@@ -361,4 +527,4 @@ contract TransferOwnershipRemote is DvnData {
     }
 }
 
-//
+// forge script script/DeployFinal.s.sol:TransferOwnershipRemote --rpc-url polygon --broadcast -vvvv 

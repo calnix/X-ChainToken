@@ -32,7 +32,7 @@ contract DeployHome is Script, LZState {
     
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         // mint supply to treasury
@@ -59,7 +59,7 @@ contract DeployElsewhere is Script, LZState {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         //params
@@ -81,11 +81,11 @@ contract DeployElsewhere is Script, LZState {
 abstract contract State is LZState {
     
     // home
-    address public mocaTokenAddress = address(0xB9B3282D15D86BfFEbf3e2BdEb564E071834fAb3);    
-    address public mocaTokenAdapterAddress = address(0xF49880d03567302Cb20B4A668bD69321B0b1bF59);                     
+    address public mocaTokenAddress = address(0x7C5FCc377D2116a8eA94Ea527774a324E73D185B);    
+    address public mocaTokenAdapterAddress = address(0x73ff46a2F756276269B2a2630C6288623d9c1bc9);                     
 
     // remote
-    address public mocaOFTAddress = address(0xdFBfeE56AB39e39fb7f0EFeE329E96c57b39Ba44);
+    address public mocaOFTAddress = address(0x45e8c7B75ba86a27562eE3760011c4adC36C076b);
 
     // set contracts
     MocaToken public mocaToken = MocaToken(mocaTokenAddress);
@@ -100,7 +100,7 @@ contract SetRemoteOnHome is State, Script {
 
     function run() public  {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
        
         // eid: The endpoint ID for the destination chain the other OFT contract lives on
@@ -118,7 +118,7 @@ contract SetRemoteOnAway is State, Script {
 
     function run() public {
         
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         // eid: The endpoint ID for the destination chain the other OFT contract lives on
@@ -140,7 +140,7 @@ import { IOAppOptionsType3, EnforcedOptionParam } from "node_modules/@layerzerol
 contract SetGasLimitsHome is State, Script {
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         EnforcedOptionParam memory enforcedOptionParam;
@@ -164,7 +164,7 @@ contract SetGasLimitsHome is State, Script {
 contract SetGasLimitsAway is State, Script {
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
         
         EnforcedOptionParam memory enforcedOptionParam;
@@ -189,7 +189,7 @@ contract SetGasLimitsAway is State, Script {
 contract SetRateLimitsHome is State, Script {
 
     function run() public {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         mocaTokenAdapter.setOutboundLimit(remoteChainID, 10 ether);
@@ -205,7 +205,7 @@ contract SetRateLimitsRemote is State, Script {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         mocaOFT.setOutboundLimit(homeChainID, 10 ether);
@@ -227,7 +227,7 @@ contract SendTokensToAway is State, Script {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         //set approval for adaptor to spend tokens
@@ -261,7 +261,7 @@ contract SendTokensToHome is State, Script {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
         
         bytes memory nullBytes = new bytes(0);
@@ -293,7 +293,7 @@ contract SendTokensToRemotePlusGas is State, Script {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         //set approval for adaptor to spend tokens
@@ -352,7 +352,7 @@ contract SendTokensToRemotePlusGas is State, Script {
 contract BreakBridge is State, Script {
     function run() public {
         
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         // eid:  The endpoint ID for the destination chain the other OFT contract lives on
@@ -371,7 +371,7 @@ contract SendAndCallToRemote is State, Script {
         
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         //set approval for adaptor to spend tokens
@@ -443,7 +443,7 @@ contract SetDvnHome is State, Script, DvnData {
 
     function run() public {
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY_2");
         vm.startBroadcast(deployerPrivateKey);
 
         // ulnConfig struct

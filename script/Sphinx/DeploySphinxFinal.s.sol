@@ -36,15 +36,24 @@ abstract contract LZState is Sphinx, Script {
     uint256 public blockChainId_polygon = 137;
 
     //create2
-    bytes32 public salt = bytes32("8");
+    bytes32 public salt = bytes32("888");
 
     // token data
-    string public name = "Latte";
-    string public symbol = "Latte";
+    string public name = "Moca";
+    string public symbol = "MOCA";
 
     // priviledged addresses
     address public ownerMultiSig = 0x1291d48f9524cE496bE32D2DC33D5E157b6Ed1e3;
     address public treasuryMultiSig = 0xe35B78991633E8130131D6A73302F96678e80f8D;
+
+    //operators
+    address public awsScript = address(0);
+    address public tenderlyScript = address(0);
+
+    // rate limits
+    uint256 public inboundLimit = 10 ether;
+    uint256 public outboundLimit = 10 ether;
+
 }
 
 abstract contract DvnData {
@@ -81,10 +90,10 @@ contract DeployFinal is LZState, DvnData {
         sphinxConfig.testnets = ["arbitrum_sepolia", "polygon_mumbai"];
         sphinxConfig.mainnets = ["mainnet", "polygon"];
 
-        sphinxConfig.projectName = "TestTokenV1";
+        sphinxConfig.projectName = "MocaToken";
         sphinxConfig.threshold = 1;
 
-        sphinxConfig.saltNonce = 1;  //in the event of project clash
+        sphinxConfig.saltNonce = 88;  //in the event of project clash
     }
 
     function precompileAddresses(address delegate, address owner) public returns(address, address, address) {
@@ -154,34 +163,35 @@ contract DeployFinal is LZState, DvnData {
             bytes32 peer = bytes32(uint256(uint160(address(mocaOFTAddress))));
             mocaTokenAdapter.setPeer(remoteChainID, peer);
 
-
             //............ Set Gas Limits
             EnforcedOptionParam memory enforcedOptionParam;
-            // msgType:1 -> a standard token transfer via send()
-            // options: -> A typical lzReceive call will use 200000 gas on most EVM chains         
             EnforcedOptionParam[] memory enforcedOptionParams = new EnforcedOptionParam[](2);
-            enforcedOptionParams[0] = EnforcedOptionParam(remoteChainID, 1, hex"00030100110100000000000000000000000000030d40");
-            
-            // block sendAndCall: createLzReceiveOption() set gas:0 and value:0 and index:0
+
+            enforcedOptionParams[0] = EnforcedOptionParam(remoteChainID, 1, hex"00030100110100000000000000000000000000030d40");            
             enforcedOptionParams[1] = EnforcedOptionParam(remoteChainID, 2, hex"000301001303000000000000000000000000000000000000");
 
             mocaTokenAdapter.setEnforcedOptions(enforcedOptionParams);
 
-
             //............ Set Rate Limits
-            mocaTokenAdapter.setOutboundLimit(remoteChainID, 10 ether);
-            mocaTokenAdapter.setInboundLimit(remoteChainID, 10 ether);
+            mocaTokenAdapter.setOutboundLimit(remoteChainID, outboundLimit);
+            mocaTokenAdapter.setInboundLimit(remoteChainID, inboundLimit);
             
             //............ Config DVN
-            setDvnHome(mocaTokenAdapterAddress);
+            setDvnEthSend(mocaTokenAdapterAddress);
+            setDvnEthReceive(mocaTokenAdapterAddress);
+
+            //...... operators
+            mocaTokenAdapter.setOperator(awsScript, true);
+            mocaTokenAdapter.setOperator(tenderlyScript, true);
+
+            //...... Whitelist Treasury
+            mocaTokenAdapter.setWhitelist(treasuryMultiSig, true);
 
             //...... delegate
-
+            mocaTokenAdapter.setDelegate(ownerMultiSig);
 
             //............ TransferOwnership
             mocaTokenAdapter.transferOwnership(ownerMultiSig);
-
-            
 
         // Remote
         } else if (block.chainid == blockChainId_polygon) { 
@@ -192,35 +202,43 @@ contract DeployFinal is LZState, DvnData {
             bytes32 peer = bytes32(uint256(uint160(address(mocaTokenAdapterAddress))));
             mocaOFT.setPeer(homeChainID, peer);
 
-
             //............ Set Gas Limits
             EnforcedOptionParam memory enforcedOptionParam;
-            // msgType:1 -> a standard token transfer via send()
-            // options: -> A typical lzReceive call will use 200000 gas on most EVM chains 
             EnforcedOptionParam[] memory enforcedOptionParams = new EnforcedOptionParam[](2);
+
             enforcedOptionParams[0] = EnforcedOptionParam(homeChainID, 1, hex"00030100110100000000000000000000000000030d40");
-            
-            // block sendAndCall: createLzReceiveOption() set gas:0 and value:0 and index:0
             enforcedOptionParams[1] = EnforcedOptionParam(homeChainID, 2, hex"000301001303000000000000000000000000000000000000");
 
             mocaOFT.setEnforcedOptions(enforcedOptionParams);
 
-
             //............ Set Rate Limits
-            mocaOFT.setOutboundLimit(homeChainID, 10 ether);
-            mocaOFT.setInboundLimit(homeChainID, 10 ether);
+            mocaOFT.setOutboundLimit(homeChainID, outboundLimit);
+            mocaOFT.setInboundLimit(homeChainID, inboundLimit);
 
             //............ Config DVN
-            setDvnRemote(mocaOFTAddress);
+            setDvnPolySend(mocaOFTAddress);
+            setDvnPolyReceive(mocaOFTAddress);
+
+            //...... operators
+            mocaOFT.setOperator(awsScript, true);
+            mocaOFT.setOperator(tenderlyScript, true);
+
+            //...... Whitelist Treasury
+            mocaOFT.setWhitelist(treasuryMultiSig, true);
 
             //...... delegate
+            mocaOFT.setDelegate(ownerMultiSig);
 
             //............ TransferOwnership
             mocaOFT.transferOwnership(ownerMultiSig);
         }
     }
 
-    function setDvnHome(address mocaTokenAdapterAddress) public {
+
+// ------------------------------------------- EthSend_PolyReceive -------------------------
+
+    function setDvnEthSend(address mocaTokenAdapterAddress) public {
+
         // ulnConfig struct
         UlnConfig memory ulnConfig; 
             // confirmation on eth 
@@ -263,10 +281,58 @@ contract DeployFinal is LZState, DvnData {
         address oappAddress = mocaTokenAdapterAddress;
 
         ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, send302_mainnet, configParams);
-        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_mainnet, configParams);
     }
 
-    function setDvnRemote(address mocaOFTAddress) public {
+    function setDvnPolyReceive(address mocaOFTAddress) public {
+
+        // ulnConfig struct
+        UlnConfig memory ulnConfig; 
+            // confirmation on eth 
+            ulnConfig.confirmations = 15;      
+            
+            // optional
+            //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
+            ulnConfig.optionalDVNCount; 
+            //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
+            ulnConfig.optionalDVNThreshold; 
+            
+            //required
+            ulnConfig.requiredDVNCount = 4; 
+            address[] memory requiredDVNs = new address[](ulnConfig.requiredDVNCount); 
+                // no duplicates. sorted an an ascending order.
+                requiredDVNs[0] = layerZero_polygon;
+                requiredDVNs[1] = nethermind_polygon;
+                requiredDVNs[2] = animoca_polygon;
+                requiredDVNs[3] = gcp;
+                
+            ulnConfig.requiredDVNs = requiredDVNs;
+        
+        // config bytes
+        bytes memory configBytes;
+        configBytes = abi.encode(ulnConfig);
+
+        // params
+        SetConfigParam memory param1 = SetConfigParam({
+            eid: homeChainID,     //note: dstEid
+            configType: 2,
+            config: configBytes
+        });
+
+        // array of params
+        SetConfigParam[] memory configParams = new SetConfigParam[](1);
+        configParams[0] = param1;
+        
+        //call endpoint
+        address endPointAddress = remoteLzEP;
+        address oappAddress = mocaOFTAddress;
+
+        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_polygon, configParams);
+    }
+
+// ------------------------------------------- POlySend_EthReceive -------------------------
+
+    function setDvnPolySend(address mocaOFTAddress) public {
+
         // ulnConfig struct
         UlnConfig memory ulnConfig; 
             // confirmation on eth 
@@ -295,7 +361,7 @@ contract DeployFinal is LZState, DvnData {
 
         // params
         SetConfigParam memory param1 = SetConfigParam({
-            eid: homeChainID,     // dstEid
+            eid: homeChainID,     //note: dstEid
             configType: 2,
             config: configBytes
         });
@@ -304,14 +370,62 @@ contract DeployFinal is LZState, DvnData {
         SetConfigParam[] memory configParams = new SetConfigParam[](1);
         configParams[0] = param1;
         
-        //call endpoint
+        //note: call endpoint
         address endPointAddress = remoteLzEP;
         address oappAddress = mocaOFTAddress;
 
         ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, send302_polygon, configParams);
-        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_polygon, configParams);
+    }
+
+    function setDvnEthReceive(address mocaTokenAdapterAddress) public {
+
+        // ulnConfig struct
+        UlnConfig memory ulnConfig; 
+            // confirmation on eth 
+            ulnConfig.confirmations = 768;      
+            
+            // optional
+            //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
+            ulnConfig.optionalDVNCount; 
+            //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
+            ulnConfig.optionalDVNThreshold; 
+            
+            //required
+            ulnConfig.requiredDVNCount = 4; 
+            address[] memory requiredDVNs = new address[](ulnConfig.requiredDVNCount); 
+                // no duplicates. sorted an an ascending order.
+                requiredDVNs[0] = layerZero_mainnet;
+                requiredDVNs[1] = animoca_mainnet;
+                requiredDVNs[2] = nethermind_mainnet;
+                requiredDVNs[3] = gcp;
+                
+            ulnConfig.requiredDVNs = requiredDVNs;
+        
+        // config bytes
+        bytes memory configBytes;
+        configBytes = abi.encode(ulnConfig);
+
+        // params
+        SetConfigParam memory param1 = SetConfigParam({
+            eid: remoteChainID,     //note: dstEid
+            configType: 2,
+            config: configBytes
+        });
+
+        // array of params
+        SetConfigParam[] memory configParams = new SetConfigParam[](1);
+        configParams[0] = param1;
+        
+        //note: call endpoint
+        address endPointAddress = homeLzEP;
+        address oappAddress = mocaTokenAdapterAddress;
+
+        ILayerZeroEndpointV2(endPointAddress).setConfig(oappAddress, receive302_mainnet, configParams);
     }
 }
+
+
+
 
 
 // npx sphinx propose script/DeploySphinxV2.s.sol --networks mainnets

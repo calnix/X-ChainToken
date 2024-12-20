@@ -1,17 +1,20 @@
 name: test
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
   check:
-    strategy:
-      fail-fast: true
-
     name: Foundry project
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,6 +25,9 @@ jobs:
         with:
           version: nightly
 
+      - name: Install Dependencies
+        run: forge install
+          
       - name: Run Forge build
         run: |
           forge --version
@@ -32,3 +38,11 @@ jobs:
         run: |
           forge test -vvv
         id: test
+        env:
+          # Add any environment variables needed for tests
+          FOUNDRY_FUZZ_RUNS: 100
+          FOUNDRY_FUZZ_MAX_TEST_REJECTS: 65536
+
+      - name: Gas Snapshot
+        run: forge snapshot
+        id: gas
