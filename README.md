@@ -209,7 +209,7 @@ Useful to reset, instead of having to increase and decrease limits.
 
 ### resetSentTokenAmount
 
-Resets the accrued sent amount for specified chain. If the rate limit has been hit for a specific epoch, owner can call this function to reset the prior cumulative sent amount, to allow sending to continue uninterrupted. 
+Resets the accrued sent amount for specified chain. If the rate limit has been hit for a specific epoch, owner can call this function to reset the prior cumulative sent amount, to allow sending to continue uninterrupted.
 
 Useful to reset, instead of having to increase and decrease limits.
 

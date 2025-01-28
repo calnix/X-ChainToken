@@ -3,17 +3,13 @@
     out = "out"
     libs = ["lib"]
     evm_version = 'paris'
-
-    #Sphinx settings:
     build_info = true
-    extra_output = ['storageLayout']
-    fs_permissions = [{ access = "read-write", path = "./"}]
-    always_use_create_2_factory = true
+    via_ir = true
+    optimizer = true
 
 remappings = [
     '@layerzerolabs/=node_modules/@layerzerolabs/',
     '@openzeppelin/=node_modules/@openzeppelin/',
-    '@sphinx-labs/contracts/=lib/sphinx/packages/contracts/contracts/foundry'
 ]
 
 # LZ does not have v2 endpoints on goerli
