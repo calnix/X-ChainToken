@@ -3,9 +3,8 @@
     out = "out"
     libs = ["lib"]
     evm_version = 'paris'
-    build_info = true
-    via_ir = true
     optimizer = true
+    via_ir = true
 
 remappings = [
     '@layerzerolabs/=node_modules/@layerzerolabs/',
