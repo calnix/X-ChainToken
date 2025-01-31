@@ -207,9 +207,9 @@ contract WhitelistDATOnRemote is State {
         address public gcp = 0xD56e4eAb23cb81f43168F9F45211Eb027b9aC7cc;
         
         // note: cannot use animocadvn; since it does not support base
-        // note: bitgo has 2 pairs of DVNS; we just randomly pick one set of them
-        address public bitgo_mainnet = 0x133e9fB2D339D8428476A714B1113B024343811E;
-        address public bitgo_base = 0x05D78174b97cf2EC223eE578CD1f401FF792ca31;
+        // note: lz docs were incorrect; refer to Kelly's answer
+        address public bitgo_mainnet = 0xc9ca319f6da263910fd9b037ec3d817a814ef3d8;
+        address public bitgo_base = 0x133e9fb2d339d8428476a714b1113b024343811e;
         
         address public nethermind_mainnet = 0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5;
         address public nethermind_base = 0xcd37CA043f8479064e10635020c65FfC005d36f6;
