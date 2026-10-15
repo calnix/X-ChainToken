@@ -146,7 +146,7 @@ abstract contract State is LZState {
                 
                 // optional
                 //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
-                ulnConfig.optionalDVNCount; 
+                ulnConfig.optionalDVNCount = 255;   // 255 is NIL_DVN_COUNT: no optional DVNs
                 //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
                 ulnConfig.optionalDVNThreshold; 
                 
@@ -198,7 +198,7 @@ abstract contract State is LZState {
                 
                 // optional
                 //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
-                ulnConfig.optionalDVNCount; 
+                ulnConfig.optionalDVNCount = 255;   // 255 is NIL_DVN_COUNT: no optional DVNs
                 //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
                 ulnConfig.optionalDVNThreshold; 
                 
@@ -263,7 +263,7 @@ abstract contract State is LZState {
                 
                 // optional
                 //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
-                ulnConfig.optionalDVNCount; 
+                ulnConfig.optionalDVNCount = 255;   // 255 is NIL_DVN_COUNT: no optional DVNs
                 //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
                 ulnConfig.optionalDVNThreshold; 
                 
@@ -316,7 +316,7 @@ abstract contract State is LZState {
                 
                 // optional
                 //0 indicate DEFAULT, NIL_DVN_COUNT indicate NONE (to override the value of default)
-                ulnConfig.optionalDVNCount; 
+                ulnConfig.optionalDVNCount = 255;   // 255 is NIL_DVN_COUNT: no optional DVNs
                 //no duplicates. sorted an an ascending order. allowed overlap with requiredDVNs
                 ulnConfig.optionalDVNThreshold; 
                 
